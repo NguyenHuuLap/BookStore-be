@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config()
 var inlineBase64 = require('nodemailer-plugin-inline-base64');
 
-const sendEmailCreateOrder = async (email,orderItems) => {
+const sendEmailCreateOrder = async (email, orderItems) => {
   let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
@@ -13,17 +13,17 @@ const sendEmailCreateOrder = async (email,orderItems) => {
       pass: process.env.MAIL_PASSWORD, // generated ethereal password
     },
   });
-  transporter.use('compile', inlineBase64({cidPrefix: 'somePrefix_'}));
+  transporter.use('compile', inlineBase64({ cidPrefix: 'somePrefix_' }));
 
   let listItem = '';
   const attachImage = []
   orderItems.forEach((order) => {
     listItem += `<div>
     <div>
-      Bạn đã đặt sản phẩm <b>${order.name}</b> với số lượng: <b>${order.amount}</b> và giá là: <b>${order.price} VND</b></div>
+      Bạn đã đặt sản phẩm <b>${order.name}</b> với số lượng: <b>${order.amount}</b> và giá là: <b>${order.price * (1 - order.discount / 100)} VND</b></div>
       <div>Bên dưới là hình ảnh của sản phẩm</div>
     </div>`
-    attachImage.push({path: order.image})
+    attachImage.push({ path: order.image })
   })
 
   // send mail with defined transport object

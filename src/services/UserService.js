@@ -90,18 +90,41 @@ const updateUser = (id, data) => {
                     message: 'The user is not defined'
                 })
             }
-
-            const updatedUser = await User.findByIdAndUpdate(id, data, { new: true })
-            resolve({
-                status: 'OK',
-                message: 'SUCCESS',
-                data: updatedUser
-            })
+            console.log(data)
+            // Check if currentPassword is provided
+            if (data.currentPassword) {
+                const comparePassword = bcrypt.compareSync(data.currentPassword, checkUser.password)
+                console.log(comparePassword)
+                if (!comparePassword) {
+                    resolve({
+                        status: 'ERR',
+                        message: 'Incorrect current password'
+                    });
+                } else { // Only proceed if the current password is correct
+                    const hashedNewPassword = bcrypt.hashSync(data.newPassword, 10)
+                    const updatedUser = await User.findByIdAndUpdate(id, { password: hashedNewPassword }, { new: true })
+                    resolve({
+                        status: 'OK',
+                        message: 'SUCCESS',
+                        data: updatedUser
+                    })
+                }
+            } else {
+                // No currentPassword provided, update other user data without changing the password
+                const updatedUser = await User.findByIdAndUpdate(id, data, { new: true })
+                resolve({
+                    status: 'OK',
+                    message: 'SUCCESS',
+                    data: updatedUser
+                })
+            }
         } catch (e) {
             reject(e)
         }
     })
 }
+
+
 
 const deleteUser = (id) => {
     return new Promise(async (resolve, reject) => {
@@ -145,7 +168,7 @@ const deleteManyUser = (ids) => {
 const getAllUser = () => {
     return new Promise(async (resolve, reject) => {
         try {
-            const allUser = await User.find().sort({createdAt: -1, updatedAt: -1})
+            const allUser = await User.find().sort({ createdAt: -1, updatedAt: -1 })
             resolve({
                 status: 'OK',
                 message: 'Success',

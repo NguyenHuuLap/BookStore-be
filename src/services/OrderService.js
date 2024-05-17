@@ -154,7 +154,7 @@ const cancelOrderDetails = (id, data) => {
                     {new: true}
                 )
                 if(productData) {
-                    order = await Order.findByIdAndDelete(id)
+                    order = await Order.findByIdAndUpdate(id, { status: 'cancel' }, { new: true });
                     if (order === null) {
                         resolve({
                             status: 'ERR',
@@ -204,10 +204,48 @@ const getAllOrder = () => {
     })
 }
 
+const updateOrderStatus = (orderId, status) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const currentOrder = await Order.findById(orderId);
+            if (!currentOrder) {
+                return resolve({
+                    status: 'ERR',
+                    message: 'The order is not defined'
+                });
+            }
+
+            // Check if the current status is 'cancel' or 'complete'
+            if (currentOrder.status === 'cancel' || currentOrder.status === 'complete') {
+                return resolve({
+                    status: 'ERR',
+                    message: `Cannot update status because the current status is ${currentOrder.status}`
+                });
+            }
+
+            // Update the order status
+            const order = await Order.findByIdAndUpdate(
+                orderId,
+                { status: status },
+                { new: true }
+            );
+
+            resolve({
+                status: 'OK',
+                message: 'Order status updated successfully',
+                data: order
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
 module.exports = {
     createOrder,
     getAllOrderDetails,
     getOrderDetails,
     cancelOrderDetails,
-    getAllOrder
+    getAllOrder,
+    updateOrderStatus
 }
