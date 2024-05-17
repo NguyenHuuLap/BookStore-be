@@ -20,7 +20,8 @@ const productSchema = new mongoose.Schema(
         rating: { type: Number, default: 0 },
         description: { type: String },
         discount: { type: Number },
-        selled: { type: Number }
+        selled: { type: Number },
+        numComments: { type: Number, default: 0 }
     },
     {
         timestamps: true,
