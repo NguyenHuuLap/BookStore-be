@@ -25,17 +25,20 @@ const createComment = async (req, res) => {
 
 const getDetailsComment = async (req, res) => {
     try {
-        const productId = req.params.id; // Sử dụng req.params thay vì req.body vì productId được truyền qua URL
-        if (!productId) {
+        const commentId = req.params.id;
+        console.log(commentId)
+        if (!commentId) {
             return res.status(400).json({
                 status: 'ERR',
-                message: 'The productId is required'
+                message: 'The commentId is required'
             });
         }
-        const response = await CommentService.getDetailsComment(productId);
+
+        const response = await CommentService.getDetailsComment(commentId);
         return res.status(200).json(response);
     } catch (error) {
         return res.status(500).json({
+            status: 'ERR',
             message: 'Internal server error',
             error: error.message
         });
@@ -56,14 +59,17 @@ const getAllComment = async (req, res) => {
 const updateComment = async (req, res) => {
     try {
         const commentId = req.params.id;
-        const status = req.body.status;
-        if (!commentId || !status) {
+        const comment = req.body.comment.comment;
+        const star = req.body.comment.star;
+
+        console.log(commentId, comment, star)
+        if (!commentId) {
             return res.status(200).json({
                 status: 'ERR',
                 message: 'The orderId and status are required'
             });
         }
-        const response = await CommentService.updateComment(commentId, status);
+        const response = await CommentService.updateComment(commentId);
         return res.status(200).json(response);
     } catch (e) {
         return res.status(404).json({
@@ -81,7 +87,6 @@ const deleteComment = async (req, res) => {
                 message: 'The commentId is required'
             })
         }
-        console.log(commentId)
         const response = await CommentService.deleteComment(commentId)
         return res.status(200).json(response)
     } catch (e) {
@@ -109,11 +114,31 @@ const deleteMany = async (req, res) => {
     }
 }
 
+const getDetailsCommentByProduct = async (req, res) => {
+    try {
+        const productId = req.params.id; // Sử dụng req.params thay vì req.body vì productId được truyền qua URL
+        if (!productId) {
+            return res.status(400).json({
+                status: 'ERR',
+                message: 'The productId is required'
+            });
+        }
+        const response = await CommentService.getDetailsCommentByProduct(productId);
+        return res.status(200).json(response);
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Internal server error',
+            error: error.message
+        });
+    }
+  };
+
 module.exports = {
     createComment,
     getDetailsComment,
     getAllComment,
     updateComment,
     deleteComment,
-    deleteMany
+    deleteMany,
+    getDetailsCommentByProduct
 }

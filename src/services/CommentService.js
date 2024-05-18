@@ -1,6 +1,7 @@
 const Comment = require("../model/CommentModel");
 const Order = require("../model/OrderProduct");
 const Product = require("../model/ProductModel")
+const User = require("../model/UserModel")
 
 const createComment = (newComment) => {
   return new Promise(async (resolve, reject) => {
@@ -11,7 +12,7 @@ const createComment = (newComment) => {
       if (!orderCheck) {
         return reject({ status: 'ERR', message: 'Order not found', id: orderId });
       }
-      
+
       // Kiểm tra xem đã có comment cho sản phẩm trong đơn hàng chưa
       const existingComment = await Comment.findOne({ order: orderId, product: productId, user: userId });
       if (existingComment) {
@@ -25,21 +26,21 @@ const createComment = (newComment) => {
         comment: comment,
         star: star
       });
-    
+
 
       //  Update the product's rating based on the new comment's star
-       const product = await Product.findOne({ _id: productId });
-       if (!product) {
-         return reject({ status: 'ERR', message: 'Product not found', id: productId });
-       }
-       
-       // Calculate new average rating
-       const totalStars = product.rating * product.numComments + star;
-       const numComments = product.numComments + 1;
-       const newRating = totalStars / numComments;
- 
-       // Update product's rating
-       await Product.updateOne({ _id: productId }, { rating: newRating, numComments: numComments });
+      const product = await Product.findOne({ _id: productId });
+      if (!product) {
+        return reject({ status: 'ERR', message: 'Product not found', id: productId });
+      }
+
+      // Calculate new average rating
+      const totalStars = product.rating * product.numComments + star;
+      const numComments = product.numComments + 1;
+      const newRating = totalStars / numComments;
+
+      // Update product's rating
+      await Product.updateOne({ _id: productId }, { rating: newRating, numComments: numComments });
 
       resolve({
         status: 'OK',
@@ -53,7 +54,41 @@ const createComment = (newComment) => {
 };
 
 
-const getDetailsComment = (productId) => {
+const getDetailsComment = async (commentId) => {
+  try {
+    const comment = await Comment.findById(commentId)
+    if (!comment) {
+      return {
+        status: 'ERR',
+        message: 'Comment not found'
+      };
+    }
+
+    const user = await User.findById(comment.user, 'name');
+    const product = await Product.findById(comment.product, 'name');
+    if (!user || !product) {
+      return {
+        status: 'ERR',
+        message: 'User or Product not found'
+      };
+    }
+
+    return {
+      status: 'OK',
+      message: 'Comment details found',
+      data: {
+        user: user.name,
+        product: product.name,
+        comment: comment.comment,
+        star: comment.star,
+      }
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getDetailsCommentByProduct = (productId) => {
   return new Promise(async (resolve, reject) => {
     try {
       const comments = await Comment.find({ product: productId }).populate('user', 'name email'); // Populating user details
@@ -95,7 +130,7 @@ const getAllComment = () => {
   });
 };
 
-const updateComment = (commentId, updatedData) => {
+const updateComment = (commentId, commentstatus, star) => {
   return new Promise(async (resolve, reject) => {
     try {
       // Find the comment by its ID
@@ -105,25 +140,25 @@ const updateComment = (commentId, updatedData) => {
       }
 
       // Update the comment fields if they exist in the updated data
-      if (updatedData.comment) {
-        comment.comment = updatedData.comment;
+      if (commentstatus) {
+        comment.comment = commentstatus;
       }
-      if (updatedData.star) {
-        comment.star = updatedData.star;
+      if (star) {
+        comment.star = star;
       }
 
       // Save the updated comment
       const updatedComment = await comment.save();
 
       // If the star field was updated, also update the product's rating
-      if (updatedData.star) {
+      if (star) {
         const product = await Product.findOne({ _id: comment.product });
         if (!product) {
           return reject({ status: 'ERR', message: 'Product not found', id: comment.product });
         }
 
         // Calculate new average rating
-        const totalStars = product.rating * product.numComments - comment.star + updatedData.star;
+        const totalStars = product.rating * product.numComments - comment.star + star;
         const newRating = totalStars / product.numComments;
 
         // Update product's rating
@@ -143,39 +178,39 @@ const updateComment = (commentId, updatedData) => {
 
 const deleteComment = (id) => {
   return new Promise(async (resolve, reject) => {
-      try {
-          const checkComment = await Comment.findOne({
-              _id: id
-          })
-          if (checkComment === null) {
-              resolve({
-                  status: 'ERR',
-                  message: 'The comment is not defined'
-              })
-          }
-
-          await Comment.findByIdAndDelete(id)
-          resolve({
-              status: 'OK',
-              message: 'Delete comment success',
-          })
-      } catch (e) {
-          reject(e)
+    try {
+      const checkComment = await Comment.findOne({
+        _id: id
+      })
+      if (checkComment === null) {
+        resolve({
+          status: 'ERR',
+          message: 'The comment is not defined'
+        })
       }
+
+      await Comment.findByIdAndDelete(id)
+      resolve({
+        status: 'OK',
+        message: 'Delete comment success',
+      })
+    } catch (e) {
+      reject(e)
+    }
   })
 }
 
 const deleteManyComment = (ids) => {
   return new Promise(async (resolve, reject) => {
-      try {
-          await Comment.deleteMany({ _id: ids })
-          resolve({
-              status: 'OK',
-              message: 'Delete comment success',
-          })
-      } catch (e) {
-          reject(e)
-      }
+    try {
+      await Comment.deleteMany({ _id: ids })
+      resolve({
+        status: 'OK',
+        message: 'Delete comment success',
+      })
+    } catch (e) {
+      reject(e)
+    }
   })
 }
 
@@ -185,5 +220,6 @@ module.exports = {
   getAllComment,
   updateComment,
   deleteComment,
-  deleteManyComment
+  deleteManyComment,
+  getDetailsCommentByProduct
 };
