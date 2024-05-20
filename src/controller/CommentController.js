@@ -26,7 +26,6 @@ const createComment = async (req, res) => {
 const getDetailsComment = async (req, res) => {
     try {
         const commentId = req.params.id;
-        console.log(commentId)
         if (!commentId) {
             return res.status(400).json({
                 status: 'ERR',
@@ -61,8 +60,6 @@ const updateComment = async (req, res) => {
         const commentId = req.params.id;
         const comment = req.body.comment.comment;
         const star = req.body.comment.star;
-
-        console.log(commentId, comment, star)
         if (!commentId) {
             return res.status(200).json({
                 status: 'ERR',

@@ -116,7 +116,7 @@ const getAllComment = () => {
       const allComments = await Comment.find()
         .populate('user', 'name') // Nạp trường 'name' từ bảng 'users'
         .populate('product', 'name') // Nạp trường 'name' từ bảng 'products'
-        .select('comment star') // Chọn trường 'comment' và 'star'
+        .select('comment star createdAt updatedAt') // Chọn trường 'comment' và 'star'
         .sort({ createdAt: -1 }); // Sắp xếp theo thời gian tạo mới nhất
 
       resolve({

@@ -90,11 +90,9 @@ const updateUser = (id, data) => {
                     message: 'The user is not defined'
                 })
             }
-            console.log(data)
             // Check if currentPassword is provided
             if (data.currentPassword) {
                 const comparePassword = bcrypt.compareSync(data.currentPassword, checkUser.password)
-                console.log(comparePassword)
                 if (!comparePassword) {
                     resolve({
                         status: 'ERR',

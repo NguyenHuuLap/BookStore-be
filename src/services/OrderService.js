@@ -185,6 +185,69 @@ const cancelOrderDetails = (id, data) => {
     });
 };
 
+const completeOrderDetails = (id, data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Fetch the order by ID to check its status
+            const order = await Order.findById(id);
+            if (!order) {
+                return resolve({
+                    status: 'ERR',
+                    message: 'Order not found'
+                });
+            }
+
+            // Check if the order status is "shipping" or "complete"
+            if (order.status === 'shipping' || order.status === 'complete') {
+                return resolve({
+                    status: 'ERR',
+                    message: 'Cannot cancel an order that is shipping or complete'
+                });
+            }
+
+            const promises = data.map(async (item) => {
+                const productData = await Product.findOneAndUpdate(
+                    {
+                        _id: item.product,
+                        selled: { $gte: item.amount }
+                    },
+                    {
+                        $inc: {
+                            countInStock: +item.amount,
+                            selled: -item.amount
+                        }
+                    },
+                    { new: true }
+                );
+
+                if (productData) {
+                    await Order.findByIdAndUpdate(id, { status: 'cancel' }, { new: true });
+                } else {
+                    return {
+                        status: 'ERR',
+                        message: `Product with id: ${item.product} not found or insufficient selled amount`
+                    };
+                }
+            });
+
+            const results = await Promise.all(promises);
+            const error = results.find(result => result && result.status === 'ERR');
+
+            if (error) {
+                return resolve(error);
+            }
+
+            resolve({
+                status: 'OK',
+                message: 'Order successfully canceled',
+                data: order
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+};
+
 const getAllOrder = () => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -243,5 +306,6 @@ module.exports = {
     getOrderDetails,
     cancelOrderDetails,
     getAllOrder,
-    updateOrderStatus
+    updateOrderStatus,
+    completeOrderDetails
 }
