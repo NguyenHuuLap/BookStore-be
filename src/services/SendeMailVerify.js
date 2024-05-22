@@ -3,7 +3,6 @@ const dotenv = require('dotenv');
 dotenv.config();
 const inlineBase64 = require('nodemailer-plugin-inline-base64');
 
-// Tạo một transporter chỉ một lần
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,

@@ -122,8 +122,6 @@ const updateUser = (id, data) => {
     })
 }
 
-
-
 const deleteUser = (id) => {
     return new Promise(async (resolve, reject) => {
         try {

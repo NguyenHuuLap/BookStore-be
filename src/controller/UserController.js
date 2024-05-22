@@ -83,17 +83,17 @@ const updateUser = async (req, res) => {
                 message: 'The userId is required'
             })
         }
-        if (data.newPassword !== data.confirmNewPassword) {
-            return res.status(400).json({
-                status: 'ERR',
-                message: 'The password must match the confirm password'
-            })
-        } else if (data.newPassword === data.confirmNewPassword && !passwordReg.test(data.newPassword)) {
-            return res.status(400).json({
-                status: 'ERR',
-                message: 'Password must be at least 8 characters long, include uppercase and lowercase letters, a number, and a special character'
-            })
-        }
+        // if (data.newPassword !== data.confirmNewPassword) {
+        //     return res.status(400).json({
+        //         status: 'ERR',
+        //         message: 'The password must match the confirm password'
+        //     })
+        // } else if (data.newPassword === data.confirmNewPassword && !passwordReg.test(data.newPassword)) {
+        //     return res.status(400).json({
+        //         status: 'ERR',
+        //         message: 'Password must be at least 8 characters long, include uppercase and lowercase letters, a number, and a special character'
+        //     })
+        // }
 
         const response = await UserService.updateUser(userId, data)
         return res.status(200).json(response)
