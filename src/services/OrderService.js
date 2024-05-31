@@ -263,7 +263,7 @@ const getAllOrder = () => {
     })
 }
 
-const updateOrderStatus = (orderId, status) => {
+const updateOrderStatus = (orderId) => {
     return new Promise(async (resolve, reject) => {
         try {
             const currentOrder = await Order.findById(orderId);
@@ -282,16 +282,38 @@ const updateOrderStatus = (orderId, status) => {
                 });
             }
 
+            // Determine the new status based on the current status
+            let newStatus;
+            switch (currentOrder.status) {
+                case 'pending':
+                    newStatus = 'confirm';
+                    updateMessage = 'Order confirmed';
+                    break;
+                case 'confirm':
+                    newStatus = 'shipping';
+                    updateMessage = 'Order is being shipped';
+                    break;
+                case 'shipping':
+                    newStatus = 'complete';
+                    updateMessage = 'Order completed';
+                    break;
+                default:
+                    return resolve({
+                        status: 'ERR',
+                        message: 'Invalid current status for automatic update'
+                    });
+            }
+
             // Update the order status
             const order = await Order.findByIdAndUpdate(
                 orderId,
-                { status: status },
+                { status: newStatus },
                 { new: true }
             );
 
             resolve({
                 status: 'OK',
-                message: 'Order status updated successfully',
+                message: updateMessage,
                 data: order
             });
         } catch (e) {
