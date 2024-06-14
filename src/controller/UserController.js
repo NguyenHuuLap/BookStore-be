@@ -1,5 +1,4 @@
 const UserService = require('../services/UserService')
-const sendEmailVerify = require('../services/SendeMailVerify');
 
 const createUser = async (req, res) => {
     try {

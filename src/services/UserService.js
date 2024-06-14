@@ -37,46 +37,51 @@ const createUser = (newUser) => {
 
 const loginUser = (userLogin) => {
     return new Promise(async (resolve, reject) => {
-        const { email, password } = userLogin
+        const { email, password } = userLogin;
         try {
             const checkUser = await User.findOne({
                 email: email
-            })
+            });
             if (checkUser === null) {
                 resolve({
                     status: 'ERR',
                     message: 'The user is not defined'
-                })
+                });
+            } else if (checkUser.isDelete) {
+                resolve({
+                    status: 'ERR',
+                    message: 'The account has been deleted'
+                });
             }
-            const comparePassword = bcrypt.compareSync(password, checkUser.password)
+            const comparePassword = bcrypt.compareSync(password, checkUser.password);
 
             if (!comparePassword) {
                 resolve({
                     status: 'ERR',
                     message: 'The password or user is incorrect'
-                })
+                });
             }
             const access_token = await genneralAccessToken({
                 id: checkUser.id,
                 isAdmin: checkUser.isAdmin
-            })
+            });
 
             const refresh_token = await genneralRefreshToken({
                 id: checkUser.id,
                 isAdmin: checkUser.isAdmin
-            })
+            });
 
             resolve({
                 status: 'OK',
                 message: 'SUCCESS',
                 access_token,
                 refresh_token
-            })
+            });
         } catch (e) {
-            reject(e)
+            reject(e);
         }
-    })
-}
+    });
+};
 
 const updateUser = (id, data) => {
     return new Promise(async (resolve, reject) => {
@@ -135,10 +140,16 @@ const deleteUser = (id) => {
                 })
             }
 
-            await User.findByIdAndDelete(id)
+            // Update isDelete to true instead of deleting the user
+            const updatedUser = await User.findByIdAndUpdate(
+                id,
+                { isDelete: !checkUser.isDelete },
+                { new: true }
+              );
             resolve({
                 status: 'OK',
-                message: 'Delete user success',
+                message: `User marked as ${updatedUser.isDelete ? 'deleted' : 'active'}`,
+                data: updatedUser
             })
         } catch (e) {
             reject(e)
@@ -149,11 +160,10 @@ const deleteUser = (id) => {
 const deleteManyUser = (ids) => {
     return new Promise(async (resolve, reject) => {
         try {
-
-            await User.deleteMany({ _id: ids })
+            await User.updateMany({ _id: { $in: ids } }, { isDelete: true })
             resolve({
                 status: 'OK',
-                message: 'Delete user success',
+                message: 'Users marked as deleted',
             })
         } catch (e) {
             reject(e)

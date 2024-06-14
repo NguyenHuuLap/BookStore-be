@@ -7,6 +7,7 @@ const commentSchema = new mongoose.Schema(
         product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
         comment: { type: String, required: true },
         star: { type: Number, default: 5, min: 1, max: 5 },
+        isDelete: {type: Boolean, default: false}
     },
     {
         timestamps: true,

@@ -77,39 +77,43 @@ const updateComment = async (req, res) => {
 
 const deleteComment = async (req, res) => {
     try {
-        const commentId = req.params.id
-        if (!commentId) {
-            return res.status(200).json({
-                status: 'ERR',
-                message: 'The commentId is required'
-            })
-        }
-        const response = await CommentService.deleteComment(commentId)
-        return res.status(200).json(response)
+      const commentId = req.params.id;
+      if (!commentId) {
+        return res.status(400).json({
+          status: 'ERR',
+          message: 'The commentId is required'
+        });
+      }
+      const response = await CommentService.deleteComment(commentId);
+      return res.status(200).json(response);
     } catch (e) {
-        return res.status(404).json({
-            message: e
-        })
+      return res.status(500).json({
+        status: 'ERR',
+        message: 'Internal server error',
+        error: e.message
+      });
     }
-}
-
-const deleteMany = async (req, res) => {
+  }
+  
+  const deleteMany = async (req, res) => {
     try {
-        const ids = req.body.ids
-        if (!ids) {
-            return res.status(200).json({
-                status: 'ERR',
-                message: 'The ids is required'
-            })
-        }
-        const response = await CommentService.deleteManyComment(ids)
-        return res.status(200).json(response)
+      const ids = req.body.ids;
+      if (!ids) {
+        return res.status(400).json({
+          status: 'ERR',
+          message: 'The ids are required'
+        });
+      }
+      const response = await CommentService.deleteManyComment(ids);
+      return res.status(200).json(response);
     } catch (e) {
-        return res.status(404).json({
-            message: e
-        })
+      return res.status(500).json({
+        status: 'ERR',
+        message: 'Internal server error',
+        error: e.message
+      });
     }
-}
+  }
 
 const getDetailsCommentByProduct = async (req, res) => {
     try {

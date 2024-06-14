@@ -4,12 +4,12 @@ const productSchema = new mongoose.Schema(
     {
         name: { type: String, required: true, unique: true },
         image: { type: String, required: true },
-        image1:  { type: String },
-        image2:  { type: String },
-        image3:  { type: String },
-        image4:  { type: String },
-        image5:  { type: String },
-        image6:  { type: String },
+        image1: { type: String },
+        image2: { type: String },
+        image3: { type: String },
+        image4: { type: String },
+        image5: { type: String },
+        image6: { type: String },
         type: { type: String, required: true },
         publishingHouse: { type: String, required: true },
         author: { type: String, required: true },
@@ -21,7 +21,8 @@ const productSchema = new mongoose.Schema(
         description: { type: String },
         discount: { type: Number },
         selled: { type: Number },
-        numComments: { type: Number, default: 0 }
+        numComments: { type: Number, default: 0 },
+        isDelete: { type: Boolean, default: false}
     },
     {
         timestamps: true,

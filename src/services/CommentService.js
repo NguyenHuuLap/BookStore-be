@@ -116,7 +116,7 @@ const getAllComment = () => {
       const allComments = await Comment.find()
         .populate('user', 'name') // Nạp trường 'name' từ bảng 'users'
         .populate('product', 'name') // Nạp trường 'name' từ bảng 'products'
-        .select('comment star createdAt updatedAt') // Chọn trường 'comment' và 'star'
+        .select('comment star createdAt updatedAt isDelete') // Chọn trường 'comment' và 'star'
         .sort({ createdAt: -1 }); // Sắp xếp theo thời gian tạo mới nhất
 
       resolve({
@@ -179,39 +179,52 @@ const updateComment = (commentId, commentstatus, star) => {
 const deleteComment = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const checkComment = await Comment.findOne({
-        _id: id
-      })
-      if (checkComment === null) {
+      const checkComment = await Comment.findOne({ _id: id });
+      if (!checkComment) {
         resolve({
           status: 'ERR',
           message: 'The comment is not defined'
-        })
+        });
       }
 
-      await Comment.findByIdAndDelete(id)
+      // Toggle the isDelete status
+      const updatedComment = await Comment.findByIdAndUpdate(
+        id,
+        { isDelete: !checkComment.isDelete },
+        { new: true }
+      );
+
       resolve({
         status: 'OK',
-        message: 'Delete comment success',
-      })
+        message: `Comment marked as ${updatedComment.isDelete ? 'deleted' : 'active'}`,
+        data: updatedComment
+      });
     } catch (e) {
-      reject(e)
+      reject(e);
     }
-  })
+  });
 }
 
 const deleteManyComment = (ids) => {
   return new Promise(async (resolve, reject) => {
     try {
-      await Comment.deleteMany({ _id: ids })
+      const comments = await Comment.find({ _id: { $in: ids } });
+
+      // Toggle the isDelete status for all comments in the ids array
+      await Promise.all(
+        comments.map(comment => 
+          Comment.findByIdAndUpdate(comment._id, { isDelete: !comment.isDelete }, { new: true })
+        )
+      );
+
       resolve({
         status: 'OK',
-        message: 'Delete comment success',
-      })
+        message: 'Comments statuses toggled',
+      });
     } catch (e) {
-      reject(e)
+      reject(e);
     }
-  })
+  });
 }
 
 module.exports = {
