@@ -4,7 +4,7 @@ const EmailService = require("../services/EmailService")
 
 const createOrder = (newOrder) => {
     return new Promise(async (resolve, reject) => {
-        const { orderItems, paymentMethod, itemsPrice, shippingPrice, totalPrice, fullName, address, city, phone, user, isPaid, paidAt, email } = newOrder
+        const { orderItems, paymentMethod, itemsPrice, shippingPrice, totalPrice, fullName, address, city, phone, user, isPaid, paidAt, email, priceDiscount } = newOrder
         try {
             const promises = orderItems.map(async (order) => {
                 const productData = await Product.findOneAndUpdate(
@@ -55,6 +55,7 @@ const createOrder = (newOrder) => {
                     },
                     paymentMethod,
                     itemsPrice,
+                    priceDiscount,
                     shippingPrice,
                     totalPrice,
                     user: user,
