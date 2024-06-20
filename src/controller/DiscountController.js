@@ -93,10 +93,28 @@ const deleteDiscount = async (req, res) => {
     }
 };
 
+const getDetailDiscount = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const response = await DiscountService.getDetailDiscount(id);
+        if (response.status === 'OK') {
+            return res.status(200).json(response);
+        } else {
+            return res.status(404).json(response);
+        }
+    } catch (error) {
+        return res.status(500).json({
+            status: 'ERR',
+            message: error.message
+        });
+    }
+};
+
 module.exports = {
     createDiscount,
     getAllDiscounts,
     getDiscountByCode,
     updateDiscount,
-    deleteDiscount
+    deleteDiscount,
+    getDetailDiscount
 };

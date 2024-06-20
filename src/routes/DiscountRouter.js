@@ -8,5 +8,6 @@ router.get('/', DiscountController.getAllDiscounts);
 router.get('/:code', DiscountController.getDiscountByCode);
 router.put('/:id', DiscountController.updateDiscount);
 router.delete('/:id', DiscountController.deleteDiscount);
+router.get('/detail/:id', DiscountController.getDetailDiscount);
 
 module.exports = router

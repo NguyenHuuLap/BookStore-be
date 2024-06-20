@@ -143,6 +143,15 @@ const cancelOrderDetails = (id, data) => {
                 });
             }
 
+            // Check if the order status is "confirm"
+            if (order.status === 'confirm') {
+                // Update order status to "re-cancel"
+                await Order.findByIdAndUpdate(id, { status: 're-cancel' }, { new: true });
+            } else if (order.status === 'pending') {
+                // Update order status to "cancel"
+                await Order.findByIdAndUpdate(id, { status: 'cancel' }, { new: true });
+            }
+
             const promises = data.map(async (item) => {
                 const productData = await Product.findOneAndUpdate(
                     {
@@ -158,9 +167,7 @@ const cancelOrderDetails = (id, data) => {
                     { new: true }
                 );
 
-                if (productData) {
-                    await Order.findByIdAndUpdate(id, { status: 'cancel' }, { new: true });
-                } else {
+                if (!productData) {
                     return {
                         status: 'ERR',
                         message: `Product with id: ${item.product} not found or insufficient selled amount`
@@ -297,6 +304,10 @@ const updateOrderStatus = (orderId) => {
                 case 'shipping':
                     newStatus = 'complete';
                     updateMessage = 'Order completed';
+                    break;
+                case 're-cancel':
+                    newStatus = 'cancel';
+                    updateMessage = 'Order cancel';
                     break;
                 default:
                     return resolve({

@@ -28,7 +28,10 @@ const createDiscount = async (newDiscount) => {
             data: discount
         };
     } catch (error) {
-        throw error;
+        return {
+            status: 'ERR',
+            message: error.message
+        };
     }
 };
 
@@ -41,7 +44,10 @@ const getAllDiscounts = async () => {
             data: discounts
         };
     } catch (error) {
-        throw error;
+        return {
+            status: 'ERR',
+            message: error.message
+        };
     }
 };
 
@@ -60,7 +66,10 @@ const getDiscountByCode = async (code) => {
             data: discount
         };
     } catch (error) {
-        throw error;
+        return {
+            status: 'ERR',
+            message: error.message
+        };
     }
 };
 
@@ -79,7 +88,10 @@ const updateDiscount = async (id, updateData) => {
             data: discount
         };
     } catch (error) {
-        throw error;
+        return {
+            status: 'ERR',
+            message: error.message
+        };
     }
 };
 
@@ -97,7 +109,32 @@ const deleteDiscount = async (id) => {
             message: 'Discount deleted successfully'
         };
     } catch (error) {
-        throw error;
+        return {
+            status: 'ERR',
+            message: error.message
+        };
+    }
+};
+
+const getDetailDiscount = async (id) => {
+    try {
+        const discount = await Discount.findById(id);
+        if (!discount) {
+            return {
+                status: 'ERR',
+                message: 'Discount not found'
+            };
+        }
+        return {
+            status: 'OK',
+            message: 'Discount fetched successfully',
+            data: discount
+        };
+    } catch (error) {
+        return {
+            status: 'ERR',
+            message: error.message
+        };
     }
 };
 
@@ -106,5 +143,6 @@ module.exports = {
     getAllDiscounts,
     getDiscountByCode,
     updateDiscount,
-    deleteDiscount
+    deleteDiscount,
+    getDetailDiscount,
 };
